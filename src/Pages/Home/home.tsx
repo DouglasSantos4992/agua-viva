@@ -25,9 +25,7 @@ function Home() {
     carregarArquivos();
   }, []);
 
-  const handleUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -98,7 +96,10 @@ function Home() {
 
             <button
               className="download"
-              onClick={() => window.open(item.url, "_blank")}
+              onClick={() => {
+                console.log("URL do arquivo:", item.url);
+                window.open(item.url, "_blank");
+              }}
             >
               ⬇️
             </button>
