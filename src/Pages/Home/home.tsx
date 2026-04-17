@@ -10,30 +10,35 @@ function Home() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
 
   const handleUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  event: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
+  const formData = new FormData();
+  formData.append("file", file);
 
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+  const response = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
 
-    const data = await response.json();
+  if (!response.ok) {
+    alert("Erro ao enviar arquivo");
+    return;
+  }
 
-    const novoArquivo: Arquivo = {
-      nome: file.name,
-      url: data.url,
-    };
+  const data = await response.json();
 
-    setArquivos((prev) => [...prev, novoArquivo]);
-
-    event.target.value = "";
+  const novoArquivo: Arquivo = {
+    nome: file.name,
+    url: data.url,
   };
+
+  setArquivos((prev) => [...prev, novoArquivo]);
+
+  event.target.value = "";
+};
 
   return (
     <div className="container">
