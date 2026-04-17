@@ -98,7 +98,12 @@ function Home() {
 
             <button
               className="download"
-              onClick={() => window.open(item.downloadUrl, "_blank")}
+              onClick={() => {
+                console.log("ARQUIVO:", item);
+                console.log("DOWNLOAD URL:", item.downloadUrl);
+
+                window.open(item.downloadUrl, "_blank");
+              }}
             >
               ⬇️
             </button>

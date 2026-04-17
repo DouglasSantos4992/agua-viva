@@ -1,13 +1,14 @@
 import { list } from "@vercel/blob";
 
 export default async function handler(_: any, res: any) {
-  const { blobs } = await list();
+  const { blobs } = await list({
+    token: process.env.BLOB_READ_WRITE_TOKEN,
+  });
 
-  const arquivos = blobs.map((file) => ({
-    nome: file.pathname,
-    url: file.url,
-    downloadUrl: file.downloadUrl,
-  }));
-
-  return res.status(200).json(arquivos);
+  return res.status(200).json(
+    blobs.map((file) => ({
+      nome: file.pathname,
+      downloadUrl: file.downloadUrl,
+    }))
+  );
 }
