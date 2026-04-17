@@ -6,9 +6,10 @@ export default async function handler(_: any, res: any) {
   });
 
   return res.status(200).json(
-    blobs.map((file) => ({
-      nome: file.pathname,
-      downloadUrl: file.downloadUrl,
-    }))
-  );
+  blobs.map((file) => ({
+    nome: file.pathname,
+    url: file.url,
+    downloadUrl: file.downloadUrl,
+  }))
+);
 }
