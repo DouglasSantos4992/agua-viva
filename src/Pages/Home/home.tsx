@@ -9,14 +9,35 @@ type Arquivo = {
 function Home() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
 
-const handleUpload = async () => {
+  const handleUpload = async (
+  event: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
   const response = await fetch("/api/upload", {
     method: "POST",
-    body: "teste upload",
+    body: formData,
   });
 
+  if (!response.ok) {
+    alert("Erro ao enviar arquivo");
+    return;
+  }
+
   const data = await response.json();
-  console.log(data);
+
+  const novoArquivo: Arquivo = {
+    nome: file.name,
+    url: data.url,
+  };
+
+  setArquivos((prev) => [...prev, novoArquivo]);
+
+  event.target.value = "";
 };
 
   return (
