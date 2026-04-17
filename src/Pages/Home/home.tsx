@@ -98,11 +98,34 @@ function Home() {
 
             <button
               className="download"
-              onClick={() => {
-                console.log("ARQUIVO:", item);
-                console.log("DOWNLOAD URL:", item.downloadUrl);
+              onClick={async () => {
+                try {
+                  console.log("baixando arquivo:", item.nome);
 
-                window.open(item.downloadUrl, "_blank");
+                  const response = await fetch(item.downloadUrl, {
+                    method: "GET",
+                  });
+
+                  if (!response.ok) {
+                    throw new Error("Erro no download");
+                  }
+
+                  const blob = await response.blob();
+
+                  const url = window.URL.createObjectURL(blob);
+
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = item.nome || "arquivo.docx";
+                  document.body.appendChild(a);
+                  a.click();
+
+                  a.remove();
+                  window.URL.revokeObjectURL(url);
+                } catch (err) {
+                  console.error(err);
+                  alert("Erro ao baixar arquivo");
+                }
               }}
             >
               ⬇️
