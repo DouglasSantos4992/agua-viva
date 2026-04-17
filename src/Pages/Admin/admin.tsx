@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "./home.css";
+import "./admin.css";
 
 type Arquivo = {
   nome: string;
