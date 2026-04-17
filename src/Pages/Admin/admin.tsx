@@ -17,7 +17,6 @@ function Admin() {
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
 
-  // 📥 listar arquivos
   useEffect(() => {
     async function carregarArquivos() {
       const response = await fetch("/api/files");
