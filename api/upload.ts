@@ -21,7 +21,7 @@ export default async function handler(req: any, res: any) {
     const filename = req.headers["x-filename"] || `arquivo-${Date.now()}`;
 
     const blob = await put(filename, body, {
-      access: "private",
+      access: "public",
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 

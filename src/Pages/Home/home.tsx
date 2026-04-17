@@ -99,7 +99,7 @@ function Home() {
             <button
               className="download"
               onClick={() => {
-                window.location.href = `/api/download?url=${encodeURIComponent(item.url)}`;
+                window.open(item.url, "_blank");
               }}
             >
               ⬇️
