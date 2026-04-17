@@ -50,7 +50,6 @@ function Home() {
     const novoArquivo: Arquivo = {
       nome: file.name,
       url: data.url,
-      downloadUrl: data.downloadUrl,
     };
 
     setArquivos((prev) => [...prev, novoArquivo]);
