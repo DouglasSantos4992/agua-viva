@@ -10,7 +10,6 @@ type Arquivo = {
 function HomePublic() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
 
-  // 📥 listar arquivos
   useEffect(() => {
     async function carregarArquivos() {
       const response = await fetch("/api/files");
@@ -36,7 +35,7 @@ function HomePublic() {
   return (
     <div className="container">
       <header className="header">
-        <h2>ÁGUA VIVA</h2>
+        <h2 style={{color:'#fff'}}>ÁGUA VIVA</h2>
       </header>
 
       <div className="content">
