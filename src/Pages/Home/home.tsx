@@ -57,6 +57,27 @@ function Home() {
     event.target.value = "";
   };
 
+  // 🔐 DOWNLOAD PRIVATE (NOVO)
+  const handleDownload = async (url: string) => {
+    try {
+      const response = await fetch(
+        `/api/download?url=${encodeURIComponent(url)}`
+      );
+
+      if (!response.ok) {
+        alert("Erro ao gerar link de download");
+        return;
+      }
+
+      const data = await response.json();
+
+      window.open(data.url, "_blank");
+    } catch (err) {
+      console.error(err);
+      alert("Erro no download");
+    }
+  };
+
   return (
     <div className="container">
       <header className="header">
@@ -96,10 +117,7 @@ function Home() {
 
             <button
               className="download"
-              onClick={() => {
-                console.log("URL do arquivo:", item.url);
-                window.open(item.url, "_blank");
-              }}
+              onClick={() => handleDownload(item.url)}
             >
               ⬇️
             </button>
