@@ -10,6 +10,7 @@ type Arquivo = {
 function Home() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
 
+  // 📥 LISTAR ARQUIVOS
   useEffect(() => {
     async function carregarArquivos() {
       const response = await fetch("/api/files");
@@ -26,6 +27,7 @@ function Home() {
     carregarArquivos();
   }, []);
 
+  // 📤 UPLOAD
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -66,17 +68,12 @@ function Home() {
     }
   };
 
+  // 📱 DOWNLOAD (iPhone + Android + PC FIX)
   const handleDownload = (item: Arquivo) => {
     const url = item.downloadUrl || item.url;
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    // 🔥 iPhone-safe (mais confiável)
+    window.location.href = url;
   };
 
   return (
@@ -86,6 +83,7 @@ function Home() {
       </header>
 
       <div className="content">
+        {/* INPUT OCULTO */}
         <input
           type="file"
           id="fileInput"
@@ -93,6 +91,7 @@ function Home() {
           onChange={handleUpload}
         />
 
+        {/* BOTÃO UPLOAD */}
         <button
           className="upload-btn"
           onClick={() => document.getElementById("fileInput")?.click()}
@@ -105,12 +104,14 @@ function Home() {
           Arquivos enviados da palavra da semana
         </p>
 
+        {/* LISTA VAZIA */}
         {arquivos.length === 0 && (
           <p style={{ fontSize: "12px", color: "#999" }}>
             Nenhum arquivo enviado ainda.
           </p>
         )}
 
+        {/* LISTA DE ARQUIVOS */}
         {arquivos.map((item, index) => (
           <div key={index} className="file-item">
             <div>
@@ -118,6 +119,7 @@ function Home() {
               <p>{item.nome}</p>
             </div>
 
+            {/* DOWNLOAD */}
             <button
               className="download"
               onClick={() => handleDownload(item)}
