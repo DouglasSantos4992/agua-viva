@@ -6,21 +6,16 @@ export default async function handler(req: any, res: any) {
       return res.status(405).json({ error: "Método não permitido" });
     }
 
-    const chunks: Buffer[] = [];
+    const formData = await req.formData();
+    const file = formData.get("file") as File;
 
-    for await (const chunk of req) {
-      chunks.push(chunk);
-    }
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-    const body = Buffer.concat(chunks);
-
-    const filename =
-      req.headers["x-filename"] || `arquivo-${Date.now()}`;
-
-    const blob = await put(filename, body, {
+    const blob = await put(file.name, buffer, {
       access: "public",
-      token: process.env.BLOB_READ_WRITE_TOKEN,
       addRandomSuffix: true,
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
     return res.status(200).json(blob);
