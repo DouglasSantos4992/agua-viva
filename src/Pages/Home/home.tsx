@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./home.css";
 
 type Arquivo = {
@@ -9,39 +9,55 @@ type Arquivo = {
 function Home() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
 
- const handleUpload = async (
-  event: React.ChangeEvent<HTMLInputElement>
-) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
+  useEffect(() => {
+    async function carregarArquivos() {
+      const response = await fetch("/api/files");
 
-  const arrayBuffer = await file.arrayBuffer();
+      if (!response.ok) {
+        console.error("Erro ao carregar arquivos");
+        return;
+      }
 
-  const response = await fetch("/api/upload", {
-    method: "POST",
-    headers: {
-      "Content-Type": file.type || "application/octet-stream",
-      "x-filename": file.name,
-    },
-    body: arrayBuffer,
-  });
+      const data = await response.json();
+      setArquivos(data);
+    }
 
-  if (!response.ok) {
-    alert("Erro ao enviar arquivo");
-    return;
-  }
+    carregarArquivos();
+  }, []);
 
-  const data = await response.json();
+  const handleUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  const novoArquivo: Arquivo = {
-    nome: file.name,
-    url: data.url,
+    const arrayBuffer = await file.arrayBuffer();
+
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      headers: {
+        "Content-Type": file.type || "application/octet-stream",
+        "x-filename": file.name,
+      },
+      body: arrayBuffer,
+    });
+
+    if (!response.ok) {
+      alert("Erro ao enviar arquivo");
+      return;
+    }
+
+    const data = await response.json();
+
+    const novoArquivo: Arquivo = {
+      nome: file.name,
+      url: data.url,
+    };
+
+    setArquivos((prev) => [...prev, novoArquivo]);
+
+    event.target.value = "";
   };
-
-  setArquivos((prev) => [...prev, novoArquivo]);
-
-  event.target.value = "";
-};
 
   return (
     <div className="container">
