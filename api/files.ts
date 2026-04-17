@@ -7,13 +7,11 @@ export default async function handler(_: any, res: any) {
     const arquivos = blobs.map((file) => ({
       nome: file.pathname,
       url: file.url,
-      downloadUrl: file.downloadUrl,
+      downloadUrl: file.downloadUrl, // 👈 ISSO É O IMPORTANTE
     }));
 
     return res.status(200).json(arquivos);
   } catch (error: any) {
-    return res.status(500).json({
-      error: error.message,
-    });
+    return res.status(500).json({ error: error.message });
   }
 }
