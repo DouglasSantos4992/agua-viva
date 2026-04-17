@@ -7,8 +7,15 @@ type Arquivo = {
   downloadUrl?: string;
 };
 
+const USER = "admin";
+const PASS = "1234";
+
 function Home() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
+  const [logged, setLogged] = useState(false);
+
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
 
   // 📥 LISTAR ARQUIVOS
   useEffect(() => {
@@ -26,6 +33,15 @@ function Home() {
 
     carregarArquivos();
   }, []);
+
+  // 🔐 LOGIN
+  const handleLogin = () => {
+    if (user === USER && pass === PASS) {
+      setLogged(true);
+    } else {
+      alert("Login inválido");
+    }
+  };
 
   // 📤 UPLOAD
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,14 +84,35 @@ function Home() {
     }
   };
 
-  // 📱 DOWNLOAD (iPhone + Android + PC FIX)
+  // 📱 DOWNLOAD (iPhone safe)
   const handleDownload = (item: Arquivo) => {
     const url = item.downloadUrl || item.url;
-
-    // 🔥 iPhone-safe (mais confiável)
     window.location.href = url;
   };
 
+  // 🔐 TELA DE LOGIN
+  if (!logged) {
+    return (
+      <div className="login">
+        <h2>Login</h2>
+
+        <input
+          placeholder="Usuário"
+          onChange={(e) => setUser(e.target.value)}
+        />
+
+        <input
+          placeholder="Senha"
+          type="password"
+          onChange={(e) => setPass(e.target.value)}
+        />
+
+        <button onClick={handleLogin}>Entrar</button>
+      </div>
+    );
+  }
+
+  // 📱 APP PRINCIPAL
   return (
     <div className="container">
       <header className="header">
@@ -83,21 +120,24 @@ function Home() {
       </header>
 
       <div className="content">
-        {/* INPUT OCULTO */}
-        <input
-          type="file"
-          id="fileInput"
-          style={{ display: "none" }}
-          onChange={handleUpload}
-        />
+        {/* UPLOAD SÓ PRA ADMIN */}
+        {logged && (
+          <>
+            <input
+              type="file"
+              id="fileInput"
+              style={{ display: "none" }}
+              onChange={handleUpload}
+            />
 
-        {/* BOTÃO UPLOAD */}
-        <button
-          className="upload-btn"
-          onClick={() => document.getElementById("fileInput")?.click()}
-        >
-          ⬆️ Upload da Palavra
-        </button>
+            <button
+              className="upload-btn"
+              onClick={() => document.getElementById("fileInput")?.click()}
+            >
+              ⬆️ Upload da Palavra
+            </button>
+          </>
+        )}
 
         <h4 className="section-title">PALAVRAS:</h4>
         <p className="subtitle">
@@ -111,7 +151,7 @@ function Home() {
           </p>
         )}
 
-        {/* LISTA DE ARQUIVOS */}
+        {/* LISTA */}
         {arquivos.map((item, index) => (
           <div key={index} className="file-item">
             <div>
@@ -119,7 +159,6 @@ function Home() {
               <p>{item.nome}</p>
             </div>
 
-            {/* DOWNLOAD */}
             <button
               className="download"
               onClick={() => handleDownload(item)}
