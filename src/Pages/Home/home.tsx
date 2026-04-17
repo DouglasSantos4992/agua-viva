@@ -4,12 +4,12 @@ import "./home.css";
 type Arquivo = {
   nome: string;
   url: string;
+  downloadUrl?: string;
 };
 
 function Home() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
 
-  // 📥 Carregar arquivos
   useEffect(() => {
     async function carregarArquivos() {
       const response = await fetch("/api/files");
@@ -26,7 +26,6 @@ function Home() {
     carregarArquivos();
   }, []);
 
-  // 📤 Upload
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -55,6 +54,7 @@ function Home() {
       const novoArquivo: Arquivo = {
         nome: file.name,
         url: data.url,
+        downloadUrl: data.downloadUrl,
       };
 
       setArquivos((prev) => [...prev, novoArquivo]);
@@ -66,6 +66,19 @@ function Home() {
     }
   };
 
+  const handleDownload = (item: Arquivo) => {
+    const url = item.downloadUrl || item.url;
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
   return (
     <div className="container">
       <header className="header">
@@ -73,7 +86,6 @@ function Home() {
       </header>
 
       <div className="content">
-        {/* Input escondido */}
         <input
           type="file"
           id="fileInput"
@@ -81,7 +93,6 @@ function Home() {
           onChange={handleUpload}
         />
 
-        {/* Botão upload */}
         <button
           className="upload-btn"
           onClick={() => document.getElementById("fileInput")?.click()}
@@ -94,14 +105,12 @@ function Home() {
           Arquivos enviados da palavra da semana
         </p>
 
-        {/* Lista vazia */}
         {arquivos.length === 0 && (
           <p style={{ fontSize: "12px", color: "#999" }}>
             Nenhum arquivo enviado ainda.
           </p>
         )}
 
-        {/* Lista de arquivos */}
         {arquivos.map((item, index) => (
           <div key={index} className="file-item">
             <div>
@@ -111,7 +120,7 @@ function Home() {
 
             <button
               className="download"
-              onClick={() => window.open(item.url, "_blank")}
+              onClick={() => handleDownload(item)}
             >
               ⬇️
             </button>
