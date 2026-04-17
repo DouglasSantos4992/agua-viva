@@ -22,10 +22,13 @@ export default async function handler(req: any, res: any) {
 
     const blob = await put(filename, body, {
       access: "private",
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
     return res.status(200).json(blob);
   } catch (error: any) {
+    console.error(error);
+
     return res.status(500).json({
       error: error?.message || "Erro no upload",
     });
