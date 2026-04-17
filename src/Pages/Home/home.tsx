@@ -9,18 +9,21 @@ type Arquivo = {
 function Home() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
 
-  const handleUpload = async (
+ const handleUpload = async (
   event: React.ChangeEvent<HTMLInputElement>
 ) => {
   const file = event.target.files?.[0];
   if (!file) return;
 
-  const formData = new FormData();
-  formData.append("file", file);
+  const arrayBuffer = await file.arrayBuffer();
 
   const response = await fetch("/api/upload", {
     method: "POST",
-    body: formData,
+    headers: {
+      "Content-Type": file.type || "application/octet-stream",
+      "x-filename": file.name,
+    },
+    body: arrayBuffer,
   });
 
   if (!response.ok) {

@@ -6,9 +6,9 @@ export default async function handler(req: any, res: any) {
       return res.status(405).json({ error: "Método não permitido" });
     }
 
-    const body = req.body;
+    const filename = req.headers["x-filename"] || `arquivo-${Date.now()}`;
 
-    const blob = await put(`arquivo-${Date.now()}.txt`, body, {
+    const blob = await put(filename, req.body, {
       access: "public",
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
@@ -16,6 +16,7 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json(blob);
   } catch (error: any) {
     console.error(error);
+
     return res.status(500).json({
       error: error?.message || "Erro no upload",
     });
