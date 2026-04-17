@@ -6,7 +6,8 @@ export default async function handler(_: any, res: any) {
 
     const arquivos = blobs.map((file) => ({
       nome: file.pathname,
-      url: file.url, // URL privada
+      url: file.url,
+      downloadUrl: file.downloadUrl,
     }));
 
     return res.status(200).json(arquivos);
