@@ -25,7 +25,10 @@ export default async function handler(req: any, res: any) {
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
-    return res.status(200).json(blob);
+    return res.status(200).json({
+      url: blob.url,
+      nome: filename,
+    });
   } catch (error: any) {
     console.error(error);
 

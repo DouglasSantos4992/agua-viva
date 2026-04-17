@@ -4,7 +4,6 @@ import "./home.css";
 type Arquivo = {
   nome: string;
   url: string;
-  downloadUrl: string;
 };
 
 function Home() {
