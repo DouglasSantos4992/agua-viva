@@ -51,6 +51,10 @@ select {
   color: #666;
 }
 
+.h2 {
+  color: #fff
+}
+
 .file-item {
   display: flex;
   justify-content: space-between;
