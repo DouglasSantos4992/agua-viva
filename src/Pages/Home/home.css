@@ -64,6 +64,11 @@ select {
   font-size: 12px;
 }
 
+.h2 {
+
+  color:white
+}
+
 .download {
   background: none;
   border: none;
