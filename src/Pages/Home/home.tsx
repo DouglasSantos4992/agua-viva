@@ -3,36 +3,36 @@ import "./home.css";
 
 type Arquivo = {
   nome: string;
-  file: File;
+  url: string;
 };
 
 function Home() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
 
-  const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
     const novoArquivo: Arquivo = {
       nome: file.name,
-      file: file,
+      url: data.url,
     };
 
     setArquivos((prev) => [...prev, novoArquivo]);
 
-    // limpa o input pra permitir subir o mesmo arquivo de novo se quiser
     event.target.value = "";
-  };
-
-  const handleDownload = (file: File) => {
-    const url = URL.createObjectURL(file);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = file.name;
-    link.click();
-
-    URL.revokeObjectURL(url);
   };
 
   return (
@@ -42,7 +42,6 @@ function Home() {
       </header>
 
       <div className="content">
-        {/* INPUT ESCONDIDO */}
         <input
           type="file"
           id="fileInput"
@@ -50,7 +49,6 @@ function Home() {
           onChange={handleUpload}
         />
 
-        {/* BOTÃO DE UPLOAD */}
         <button
           className="upload-btn"
           onClick={() => document.getElementById("fileInput")?.click()}
@@ -76,7 +74,7 @@ function Home() {
 
             <button
               className="download"
-              onClick={() => handleDownload(item.file)}
+              onClick={() => window.open(item.url, "_blank")}
             >
               ⬇️
             </button>
