@@ -1,11 +1,5 @@
 import { put } from "@vercel/blob";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 export default async function handler(req: any, res: any) {
   try {
     if (req.method !== "POST") {
@@ -26,11 +20,12 @@ export default async function handler(req: any, res: any) {
     const blob = await put(filename, body, {
       access: "private",
       token: process.env.BLOB_READ_WRITE_TOKEN,
+      addRandomSuffix: true, // 🔥 ISSO AQUI RESOLVE
     });
 
     return res.status(200).json(blob);
   } catch (err: any) {
-    console.error("UPLOAD ERROR:", err);
+    console.error(err);
     return res.status(500).json({ error: err.message });
   }
 }
