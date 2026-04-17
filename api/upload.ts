@@ -1,20 +1,15 @@
 import { put } from "@vercel/blob";
 
-export async function POST(request: Request) {
+export default async function handler(req: any, res: any) {
   try {
-    const formData = await request.formData();
-    const file = formData.get("file") as File;
-
-    if (!file) {
-      return Response.json({ error: "Arquivo não enviado" }, { status: 400 });
-    }
-
-    const blob = await put(file.name, file, {
+    const blob = await put("teste.txt", "teste funcionando", {
       access: "public",
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
-    return Response.json(blob);
+    return res.status(200).json(blob);
   } catch (error) {
-    return Response.json({ error: "Erro no upload" }, { status: 500 });
+    console.error(error);
+    return res.status(500).json({ error: "Erro no upload" });
   }
 }
