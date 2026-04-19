@@ -13,6 +13,7 @@ const PASS = "1234";
 function Admin() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
   const [logged, setLogged] = useState(false);
+
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
 
@@ -20,6 +21,7 @@ function Admin() {
     async function carregarArquivos() {
       try {
         const response = await fetch("/api/files");
+
         if (!response.ok) return;
 
         const data = await response.json();
@@ -119,58 +121,47 @@ function Admin() {
 
       <div className="content">
         <div className="panel">
-          <div className="toolbar">
-            <h3>Gerenciar Arquivos</h3>
+          <input
+            type="file"
+            id="fileInput"
+            style={{ display: "none" }}
+            onChange={handleUpload}
+          />
 
-            <input
-              type="file"
-              id="fileInput"
-              style={{ display: "none" }}
-              onChange={handleUpload}
-            />
+          <button
+            className="upload-btn"
+            onClick={() => document.getElementById("fileInput")?.click()}
+          >
+            ⬆️ Upload da Palavra
+          </button>
 
-            <button
-              className="upload-btn"
-              onClick={() => document.getElementById("fileInput")?.click()}
-            >
-              + Upload
-            </button>
-          </div>
+          <h4 className="section-title">
+            Arquivos enviados ({arquivos.length})
+          </h4>
 
-          <table className="file-table">
-            <thead>
-              <tr>
-                <th>Arquivo</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {arquivos.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.nome}</td>
-                  <td>
-                    <span className="status">Disponível</span>
-                  </td>
-                  <td>
-                    <button
-                      className="download-btn"
-                      onClick={() => {
-                        const url = item.downloadUrl || item.url;
-                        window.location.href = url;
-                      }}
-                    >
-                      Download
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {arquivos.length === 0 && (
+          {arquivos.length === 0 ? (
             <p className="empty-message">Nenhum arquivo enviado ainda.</p>
+          ) : (
+            <div className="file-list">
+              {arquivos.map((item, index) => (
+                <div key={index} className="file-item">
+                  <div className="file-info">
+                    <span className="file-label">Arquivo</span>
+                    <span className="file-name">{item.nome}</span>
+                  </div>
+
+                  <button
+                    className="download"
+                    onClick={() => {
+                      const url = item.downloadUrl || item.url;
+                      window.location.href = url;
+                    }}
+                  >
+                    ⬇
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
