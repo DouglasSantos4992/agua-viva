@@ -34,7 +34,6 @@ function Admin() {
     carregarArquivos();
   }, []);
 
-  // LOGIN
   const handleLogin = () => {
     if (user === USER && pass === PASS) {
       setLogged(true);
@@ -43,7 +42,6 @@ function Admin() {
     }
   };
 
-  // UPLOAD
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -81,14 +79,12 @@ function Admin() {
     }
   };
 
-  // LOGOUT
   const handleLogout = () => {
     setLogged(false);
     setUser("");
     setPass("");
   };
 
-  // TELA LOGIN
   if (!logged) {
     return (
       <div className="login">
@@ -114,7 +110,6 @@ function Admin() {
     );
   }
 
-  // PAINEL ADMIN
   return (
     <div className="container">
       <header className="header">
@@ -147,24 +142,26 @@ function Admin() {
           {arquivos.length === 0 ? (
             <p className="empty-message">Nenhum arquivo enviado ainda.</p>
           ) : (
-            arquivos.map((item, index) => (
-              <div key={index} className="file-item">
-                <div className="file-info">
-                  <strong>PALAVRA</strong>
-                  <p>{item.nome}</p>
-                </div>
+            <div className="file-list">
+              {arquivos.map((item, index) => (
+                <div key={index} className="file-item">
+                  <div className="file-info">
+                    <span className="file-label">Arquivo</span>
+                    <span className="file-name">{item.nome}</span>
+                  </div>
 
-                <button
-                  className="download"
-                  onClick={() => {
-                    const url = item.downloadUrl || item.url;
-                    window.location.href = url;
-                  }}
-                >
-                  ⬇️
-                </button>
-              </div>
-            ))
+                  <button
+                    className="download"
+                    onClick={() => {
+                      const url = item.downloadUrl || item.url;
+                      window.location.href = url;
+                    }}
+                  >
+                    ⬇
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
