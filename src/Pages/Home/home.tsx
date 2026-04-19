@@ -35,7 +35,7 @@ function HomePublic() {
   return (
     <div className="container">
       <header className="header">
-        <h2 style={{color:'#fff'}}>ÁGUA VIVA</h2>
+        <h2 style={{ color: "#fff" }}>ÁGUA VIVA</h2>
       </header>
 
       <div className="content">
@@ -43,29 +43,26 @@ function HomePublic() {
         <p className="subtitle">Arquivos enviados da palavra da semana</p>
 
         {arquivos.length === 0 ? (
-            <p className="empty-message">Nenhum arquivo enviado ainda.</p>
-          ) : (
-            <div className="file-list">
-              {arquivos.map((item, index) => (
-                <div key={index} className="file-item">
-                  <div className="file-info">
-                    <span className="file-label">Arquivo</span>
-                    <span className="file-name">{item.nome}</span>
-                  </div>
-
-                  <button
-                    className="download"
-                    onClick={() => {
-                      const url = item.downloadUrl || item.url;
-                      window.location.href = url;
-                    }}
-                  >
-                    ⬇
-                  </button>
+          <p className="empty-message">Nenhum arquivo enviado ainda.</p>
+        ) : (
+          <div className="file-list">
+            {arquivos.map((item, index) => (
+              <div key={index} className="file-item">
+                <div className="file-info">
+                  <span className="file-label">Arquivo</span>
+                  <span className="file-name">{item.nome}</span>
                 </div>
-              ))}
-            </div>
-          )}
+
+                <button
+                  className="download"
+                  onClick={() => handleDownload(item)}
+                >
+                  ⬇
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
