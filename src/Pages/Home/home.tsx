@@ -20,7 +20,7 @@ function HomePublic() {
       }
 
       const data = await response.json();
-      setArquivos(data);
+      setArquivos(data.slice(-5).reverse());
     }
 
     carregarArquivos();

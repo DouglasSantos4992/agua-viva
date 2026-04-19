@@ -25,7 +25,7 @@ function Admin() {
         if (!response.ok) return;
 
         const data = await response.json();
-        setArquivos(data);
+        setArquivos(data.slice(-5).reverse());
       } catch (error) {
         console.error("Erro ao carregar arquivos:", error);
       }
@@ -65,14 +65,16 @@ function Admin() {
 
       const data = await response.json();
 
-      setArquivos((prev) => [
-        ...prev,
-        {
-          nome: file.name,
-          url: data.url,
-          downloadUrl: data.downloadUrl,
-        },
-      ]);
+      setArquivos((prev) =>
+        [
+          {
+            nome: file.name,
+            url: data.url,
+            downloadUrl: data.downloadUrl,
+          },
+          ...prev,
+        ].slice(0, 5),
+      );
     } catch (error) {
       console.error("Erro no upload:", error);
       alert("Erro ao enviar arquivo");
