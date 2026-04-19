@@ -42,27 +42,30 @@ function HomePublic() {
         <h4 className="section-title">PALAVRAS:</h4>
         <p className="subtitle">Arquivos enviados da palavra da semana</p>
 
-        {arquivos.length === 0 && (
-          <p style={{ fontSize: "12px", color: "#999" }}>
-            Nenhum arquivo enviado ainda.
-          </p>
-        )}
+        {arquivos.length === 0 ? (
+            <p className="empty-message">Nenhum arquivo enviado ainda.</p>
+          ) : (
+            <div className="file-list">
+              {arquivos.map((item, index) => (
+                <div key={index} className="file-item">
+                  <div className="file-info">
+                    <span className="file-label">Arquivo</span>
+                    <span className="file-name">{item.nome}</span>
+                  </div>
 
-        {arquivos.map((item, index) => (
-          <div key={index} className="file-item">
-            <div>
-              <strong>PALAVRAS</strong>
-              <p>{item.nome}</p>
+                  <button
+                    className="download"
+                    onClick={() => {
+                      const url = item.downloadUrl || item.url;
+                      window.location.href = url;
+                    }}
+                  >
+                    ⬇
+                  </button>
+                </div>
+              ))}
             </div>
-
-            <button
-              className="download"
-              onClick={() => handleDownload(item)}
-            >
-              ⬇️
-            </button>
-          </div>
-        ))}
+          )}
       </div>
     </div>
   );
