@@ -8,7 +8,7 @@ type Arquivo = {
 };
 
 const USER = "admin";
-const PASS = "1234";
+const PASS = "aguaviva@2026";
 
 function Admin() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
@@ -115,7 +115,7 @@ function Admin() {
   return (
     <div className="container">
       <header className="header">
-        <h2>ADMIN - ÁGUA VIVA</h2>
+        <h2 style={{color:"#fff"}}>ADMIN - ÁGUA VIVA</h2>
         <button className="logout-btn" onClick={handleLogout}>
           Sair
         </button>
