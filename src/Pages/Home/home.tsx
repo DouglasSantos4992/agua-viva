@@ -26,7 +26,6 @@ function HomePublic() {
     carregarArquivos();
   }, []);
 
-  // 📱 download (iPhone safe)
   const handleDownload = (item: Arquivo) => {
     const url = item.downloadUrl || item.url;
     window.location.href = url;
