@@ -43,43 +43,41 @@ function Admin() {
   };
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-    try {
-      const arrayBuffer = await file.arrayBuffer();
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("filename", file.name);
 
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": file.type || "application/octet-stream",
-          "x-filename": encodeURIComponent(file.name),
-        },
-        body: arrayBuffer,
-      });
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
 
-      if (!response.ok) {
-        alert("Erro ao enviar arquivo");
-        return;
-      }
-
-      const data = await response.json();
-
-      setArquivos((prev) =>
-        [
-          {
-            nome: file.name,
-            url: data.url,
-            downloadUrl: data.downloadUrl,
-          },
-          ...prev,
-        ].slice(0, 5),
-      );
-    } catch (error) {
-      console.error("Erro no upload:", error);
+    if (!response.ok) {
       alert("Erro ao enviar arquivo");
+      return;
     }
-  };
+
+    const data = await response.json();
+
+    setArquivos((prev) =>
+      [
+        {
+          nome: file.name,
+          url: data.url,
+          downloadUrl: data.downloadUrl,
+        },
+        ...prev,
+      ].slice(0, 5)
+    );
+  } catch (error) {
+    console.error("Erro no upload:", error);
+    alert("Erro ao enviar arquivo");
+  }
+};
 
   const handleLogout = () => {
     setLogged(false);

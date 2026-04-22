@@ -1,5 +1,11 @@
 import { put } from "@vercel/blob";
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 export default async function handler(req: any, res: any) {
   try {
     if (req.method !== "POST") {
@@ -12,15 +18,29 @@ export default async function handler(req: any, res: any) {
       chunks.push(chunk);
     }
 
-    const body = Buffer.concat(chunks);
+    const bodyBuffer = Buffer.concat(chunks);
 
-    const filename = req.headers["x-filename"]
-      ? decodeURIComponent(req.headers["x-filename"] as string)
-      : `arquivo-${Date.now()}`;
+    const boundary = req.headers["content-type"].split("boundary=")[1];
+    const parts = bodyBuffer.toString().split(`--${boundary}`);
 
-    const blob = await put(filename, body, {
+    const filePart = parts.find((part: string) =>
+      part.includes('name="file"')
+    );
+
+    const filenamePart = parts.find((part: string) =>
+      part.includes('name="filename"')
+    );
+
+    const filenameMatch = filenamePart?.match(/\r\n\r\n([\s\S]*)\r\n/);
+    const filename = filenameMatch?.[1]?.trim() || `arquivo-${Date.now()}`;
+
+    const fileStart = filePart.indexOf("\r\n\r\n") + 4;
+    const fileEnd = filePart.lastIndexOf("\r\n");
+    const fileBuffer = Buffer.from(filePart.substring(fileStart, fileEnd), "binary");
+
+    const blob = await put(filename, fileBuffer, {
       access: "public",
-      addRandomSuffix: false,
+      addRandomSuffix: true,
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
