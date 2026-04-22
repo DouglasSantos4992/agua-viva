@@ -53,7 +53,7 @@ function Admin() {
         method: "POST",
         headers: {
           "Content-Type": file.type || "application/octet-stream",
-          "x-filename": file.name,
+          "x-filename": encodeURIComponent(file.name),
         },
         body: arrayBuffer,
       });
@@ -115,7 +115,7 @@ function Admin() {
   return (
     <div className="container">
       <header className="header">
-        <h2 style={{color:"#fff"}}>ADMIN - ÁGUA VIVA</h2>
+        <h2 style={{ color: "#fff" }}>ADMIN - ÁGUA VIVA</h2>
         <button className="logout-btn" onClick={handleLogout}>
           Sair
         </button>

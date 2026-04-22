@@ -14,11 +14,13 @@ export default async function handler(req: any, res: any) {
 
     const body = Buffer.concat(chunks);
 
-    const filename = req.headers["x-filename"] || `arquivo-${Date.now()}`;
+    const filename = req.headers["x-filename"]
+      ? decodeURIComponent(req.headers["x-filename"] as string)
+      : `arquivo-${Date.now()}`;
 
     const blob = await put(filename, body, {
       access: "public",
-      addRandomSuffix: true,
+      addRandomSuffix: false,
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
