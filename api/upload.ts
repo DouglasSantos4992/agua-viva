@@ -29,12 +29,14 @@ export default async function handler(req: any, res: any) {
 
       const fileBuffer = fs.readFileSync(file.filepath);
 
-      console.log("Nome original:", file.originalFilename);
+      const originalName = Buffer.from(
+        file.originalFilename || `arquivo-${Date.now()}`,
+        "latin1"
+      ).toString("utf8");
 
-      const safeName =
-        file.originalFilename
-          ?.normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "") || `arquivo-${Date.now()}`;
+      const safeName = originalName
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
 
       const blob = await put(safeName, fileBuffer, {
         access: "public",
