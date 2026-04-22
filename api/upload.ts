@@ -29,6 +29,8 @@ export default async function handler(req: any, res: any) {
 
       const fileBuffer = fs.readFileSync(file.filepath);
 
+      console.log("Nome original:", file.originalFilename);
+
       const safeName =
         file.originalFilename
           ?.normalize("NFD")
