@@ -8,7 +8,7 @@ export default async function handler(_: any, res: any) {
 
     return res.status(200).json(
       blobs.map((file) => ({
-        nome: decodeURIComponent(file.pathname),
+        nome: decodeURIComponent(file.url.split("/").pop() || ""),
         url: file.url,
       }))
     );

@@ -29,9 +29,9 @@ export default async function handler(req: any, res: any) {
 
       const fileBuffer = fs.readFileSync(file.filepath);
 
-      const blob = await put("EDIFICAÇÃO.docx", fileBuffer, {
+      const blob = await put(file.originalFilename || `arquivo-${Date.now()}`, fileBuffer, {
         access: "public",
-        addRandomSuffix: true,
+        addRandomSuffix: false,
         token: process.env.BLOB_READ_WRITE_TOKEN,
       });
 
