@@ -29,14 +29,19 @@ export default async function handler(req: any, res: any) {
 
       const fileBuffer = fs.readFileSync(file.filepath);
 
-      const blob = await put(file.originalFilename || `arquivo-${Date.now()}`, fileBuffer, {
+      const safeName =
+        file.originalFilename
+          ?.normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "") || `arquivo-${Date.now()}`;
+
+      const blob = await put(safeName, fileBuffer, {
         access: "public",
         addRandomSuffix: false,
         token: process.env.BLOB_READ_WRITE_TOKEN,
       });
 
       return res.status(200).json({
-        nome: file.originalFilename,
+        nome: safeName,
         url: blob.url,
         downloadUrl: blob.downloadUrl,
       });
