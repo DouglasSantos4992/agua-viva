@@ -30,7 +30,11 @@ export default async function handler(req: any, res: any) {
     }
 
     const fileBuffer = fs.readFileSync(file.filepath);
-    const originalName = file.originalFilename || `arquivo-${Date.now()}.docx`;
+
+    const originalName = Buffer.from(
+      file.originalFilename || `arquivo-${Date.now()}.docx`,
+      "latin1"
+    ).toString("utf8");
 
     const safeBlobName = `arquivo-${Date.now()}${path.extname(originalName)}`;
 
