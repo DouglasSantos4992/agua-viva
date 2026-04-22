@@ -23,20 +23,25 @@ export default async function handler(req: any, res: any) {
     const boundary = req.headers["content-type"].split("boundary=")[1];
     const parts = bodyBuffer.toString().split(`--${boundary}`);
 
-    const filePart = parts.find((part: string) =>
-      part.includes('name="file"')
-    );
+    const filePart = parts.find((part: string) => part.includes('name="file"'));
 
     const filenamePart = parts.find((part: string) =>
-      part.includes('name="filename"')
+      part.includes('name="filename"'),
     );
 
     const filenameMatch = filenamePart?.match(/\r\n\r\n([\s\S]*)\r\n/);
     const filename = filenameMatch?.[1]?.trim() || `arquivo-${Date.now()}`;
 
+    if (!filePart) {
+      return res.status(400).json({ error: "Arquivo não enviado" });
+    }
+
     const fileStart = filePart.indexOf("\r\n\r\n") + 4;
     const fileEnd = filePart.lastIndexOf("\r\n");
-    const fileBuffer = Buffer.from(filePart.substring(fileStart, fileEnd), "binary");
+    const fileBuffer = Buffer.from(
+      filePart.substring(fileStart, fileEnd),
+      "binary",
+    );
 
     const blob = await put(filename, fileBuffer, {
       access: "public",
