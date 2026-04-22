@@ -9,8 +9,6 @@ export const config = {
   },
 };
 
-const FILE_DB = path.join(process.cwd(), "data", "files.json");
-
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método não permitido" });
@@ -31,33 +29,18 @@ export default async function handler(req: any, res: any) {
 
     const fileBuffer = fs.readFileSync(file.filepath);
 
-    const originalName = Buffer.from(
-      file.originalFilename || `arquivo-${Date.now()}.docx`,
-      "latin1"
-    ).toString("utf8");
+    const originalName = file.originalFilename || `arquivo-${Date.now()}.docx`;
 
-    const safeBlobName = `arquivo-${Date.now()}${path.extname(originalName)}`;
+    const safeBlobName = originalName
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "-");
 
     const blob = await put(safeBlobName, fileBuffer, {
       access: "public",
+      addRandomSuffix: true,
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
-
-    let registros = [];
-
-    if (fs.existsSync(FILE_DB)) {
-      registros = JSON.parse(fs.readFileSync(FILE_DB, "utf-8"));
-    }
-
-    registros.push({
-      nome: originalName,
-      url: blob.url,
-      downloadUrl: blob.downloadUrl,
-    });
-
-    registros = registros.slice(-5);
-
-    fs.writeFileSync(FILE_DB, JSON.stringify(registros, null, 2));
 
     return res.status(200).json({
       nome: originalName,

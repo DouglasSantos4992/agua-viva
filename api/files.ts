@@ -1,17 +1,23 @@
-import fs from "fs";
-import path from "path";
-
-const FILE_DB = path.join(process.cwd(), "data", "files.json");
+import { list } from "@vercel/blob";
 
 export default async function handler(_: any, res: any) {
   try {
-    if (!fs.existsSync(FILE_DB)) {
-      return res.status(200).json([]);
-    }
+    const { blobs } = await list({
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    });
 
-    const registros = JSON.parse(fs.readFileSync(FILE_DB, "utf-8"));
+    const arquivos = blobs
+      .slice(-5)
+      .reverse()
+      .map((file) => ({
+        nome: file.pathname
+          .replace(/-[A-Za-z0-9]+\./, ".")
+          .replace(/-/g, " "),
+        url: file.url,
+        downloadUrl: file.downloadUrl,
+      }));
 
-    return res.status(200).json(registros.reverse());
+    return res.status(200).json(arquivos);
   } catch (error) {
     return res.status(500).json({ error: "Erro ao listar arquivos" });
   }
