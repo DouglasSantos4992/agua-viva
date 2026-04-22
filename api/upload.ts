@@ -1,4 +1,6 @@
 import { put } from "@vercel/blob";
+import formidable from "formidable";
+import fs from "fs";
 
 export const config = {
   api: {
@@ -12,52 +14,32 @@ export default async function handler(req: any, res: any) {
       return res.status(405).json({ error: "Método não permitido" });
     }
 
-    const chunks: Buffer[] = [];
+    const form = formidable();
 
-    for await (const chunk of req) {
-      chunks.push(chunk);
-    }
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        return res.status(500).json({ error: "Erro ao processar upload" });
+      }
 
-    const bodyBuffer = Buffer.concat(chunks);
+      const file = Array.isArray(files.file) ? files.file[0] : files.file;
 
-    const boundary = req.headers["content-type"].split("boundary=")[1];
+      if (!file) {
+        return res.status(400).json({ error: "Arquivo não enviado" });
+      }
 
-    const parts = bodyBuffer.toString("latin1").split(`--${boundary}`);
+      const fileBuffer = fs.readFileSync(file.filepath);
 
-    const filePart = parts.find((part: string) =>
-      part.includes('name="file"')
-    );
+      const blob = await put(file.originalFilename || `arquivo-${Date.now()}`, fileBuffer, {
+        access: "public",
+        addRandomSuffix: true,
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
 
-    const filenamePart = parts.find((part: string) =>
-      part.includes('name="filename"')
-    );
-
-    const filenameMatch = filenamePart?.match(/\r\n\r\n([\s\S]*)\r\n/);
-
-    const filename =
-      filenameMatch?.[1]?.trim() || `arquivo-${Date.now()}`;
-
-    if (!filePart) {
-      return res.status(400).json({ error: "Arquivo não enviado" });
-    }
-
-    const fileStart = filePart.indexOf("\r\n\r\n") + 4;
-    const fileEnd = filePart.lastIndexOf("\r\n");
-
-    const fileBuffer = Buffer.from(
-      filePart.substring(fileStart, fileEnd),
-      "latin1"
-    );
-
-    const blob = await put(filename, fileBuffer, {
-      access: "public",
-      addRandomSuffix: true,
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    });
-
-    return res.status(200).json({
-      ...blob,
-      originalName: filename,
+      return res.status(200).json({
+        nome: file.originalFilename,
+        url: blob.url,
+        downloadUrl: blob.downloadUrl,
+      });
     });
   } catch (err: any) {
     console.error(err);
