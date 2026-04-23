@@ -14,12 +14,8 @@ import {
   FileName,
   DownloadButton,
 } from "./home.styled";
+import type { Arquivo } from "./type";
 
-type Arquivo = {
-  nome: string;
-  url: string;
-  downloadUrl?: string;
-};
 
 function HomePublic() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);

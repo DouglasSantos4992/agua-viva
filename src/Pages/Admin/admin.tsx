@@ -22,12 +22,7 @@ import {
   FileName,
   DownloadButton,
 } from "./admin.styled";
-
-type Arquivo = {
-  nome: string;
-  url: string;
-  downloadUrl?: string;
-};
+import type { Arquivo } from "./type";
 
 const USER = "admin";
 const PASS = "aguaviva@2026";
