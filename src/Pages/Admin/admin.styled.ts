@@ -1,33 +1,28 @@
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #eef2f7;
-}
+import styled from "styled-components";
 
-/* LOGIN */
-.login {
+export const LoginWrapper = styled.div`
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   background: linear-gradient(135deg, #081426, #102542);
-}
+`;
 
-.login-box {
+export const LoginBox = styled.div`
   width: 350px;
   background: white;
   padding: 35px;
   border-radius: 18px;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
-}
+`;
 
-.login-box h2 {
+export const LoginTitle = styled.h2`
   text-align: center;
   color: #102542;
   margin-bottom: 25px;
-}
+`;
 
-.login-box input {
+export const Input = styled.input`
   width: 100%;
   padding: 14px;
   margin-bottom: 15px;
@@ -35,9 +30,9 @@ body {
   border-radius: 10px;
   font-size: 14px;
   box-sizing: border-box;
-}
+`;
 
-.login-box button {
+export const LoginButton = styled.button`
   width: 100%;
   padding: 14px;
   border: none;
@@ -46,17 +41,25 @@ body {
   font-weight: bold;
   border-radius: 10px;
   cursor: pointer;
-}
+`;
 
-/* HEADER */
-.header {
+export const Container = styled.div`
+  min-height: 100vh;
+  background: #eef2f7;
+`;
+
+export const Header = styled.header`
   background: linear-gradient(90deg, #081426, #102542);
   color: white;
   padding: 25px;
   text-align: center;
-}
+`;
 
-.logout-btn {
+export const HeaderTitle = styled.h2`
+  margin: 0;
+`;
+
+export const LogoutButton = styled.button`
   margin-top: 10px;
   padding: 10px 18px;
   border: none;
@@ -65,23 +68,26 @@ body {
   font-weight: bold;
   border-radius: 8px;
   cursor: pointer;
-}
+`;
 
-/* CONTENT */
-.content {
+export const Content = styled.div`
   max-width: 900px;
   margin: 35px auto;
   padding: 30px;
-}
+`;
 
-.panel {
+export const Panel = styled.div`
   background: white;
   padding: 30px;
   border-radius: 18px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-}
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+`;
 
-.upload-btn {
+export const HiddenInput = styled.input`
+  display: none;
+`;
+
+export const UploadButton = styled.button`
   width: 100%;
   padding: 15px;
   background: linear-gradient(90deg, #d32f2f, #b71c1c);
@@ -90,28 +96,27 @@ body {
   border: none;
   border-radius: 12px;
   cursor: pointer;
-}
+`;
 
-.section-title {
+export const SectionTitle = styled.h4`
   margin: 30px 0 20px;
   color: #102542;
   font-size: 20px;
   text-align: center;
-}
+`;
 
-.empty-message {
+export const EmptyMessage = styled.p`
   text-align: center;
   color: #777;
-}
+`;
 
-/* FILE LIST */
-.file-list {
+export const FileList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 14px;
-}
+`;
 
-.file-item {
+export const FileItem = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -119,36 +124,28 @@ body {
   border-radius: 12px;
   background: #f9fbfd;
   border: 1px solid #dce3ec;
-  transition: all 0.25s ease;
-}
+`;
 
-.file-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
-}
-
-.file-info {
+export const FileInfo = styled.div`
   display: flex;
   flex-direction: column;
-}
+`;
 
-.file-label {
+export const FileLabel = styled.span`
   font-size: 12px;
   font-weight: bold;
   color: #7a8797;
   margin-bottom: 4px;
   text-transform: uppercase;
-}
+`;
 
-.file-name {
+export const FileName = styled.span`
   font-size: 14px;
   color: #102542;
   font-weight: 600;
-  word-break: break-word;
-  max-width: 650px;
-}
+`;
 
-.download {
+export const DownloadButton = styled.button`
   min-width: 46px;
   height: 46px;
   border: none;
@@ -157,4 +154,4 @@ body {
   color: white;
   cursor: pointer;
   font-size: 18px;
-}
+`;

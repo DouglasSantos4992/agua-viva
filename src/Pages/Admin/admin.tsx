@@ -1,5 +1,27 @@
 import { useEffect, useState } from "react";
-import "./admin.css";
+import {
+  LoginWrapper,
+  LoginBox,
+  LoginTitle,
+  Input,
+  LoginButton,
+  Container,
+  Header,
+  HeaderTitle,
+  LogoutButton,
+  Content,
+  Panel,
+  HiddenInput,
+  UploadButton,
+  SectionTitle,
+  EmptyMessage,
+  FileList,
+  FileItem,
+  FileInfo,
+  FileLabel,
+  FileName,
+  DownloadButton,
+} from "./admin.styled";
 
 type Arquivo = {
   nome: string;
@@ -13,7 +35,6 @@ const PASS = "aguaviva@2026";
 function Admin() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
   const [logged, setLogged] = useState(false);
-
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
 
@@ -21,7 +42,6 @@ function Admin() {
     async function carregarArquivos() {
       try {
         const response = await fetch("/api/files");
-
         if (!response.ok) return;
 
         const data = await response.json();
@@ -43,41 +63,40 @@ function Admin() {
   };
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("filename", file.name);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    if (!response.ok) {
+      if (!response.ok) {
+        alert("Erro ao enviar arquivo");
+        return;
+      }
+
+      const data = await response.json();
+
+      setArquivos((prev) =>
+        [
+          {
+            nome: file.name,
+            url: data.url,
+            downloadUrl: data.downloadUrl,
+          },
+          ...prev,
+        ].slice(0, 5)
+      );
+    } catch (error) {
+      console.error("Erro no upload:", error);
       alert("Erro ao enviar arquivo");
-      return;
     }
-
-    const data = await response.json();
-
-    setArquivos((prev) =>
-      [
-        {
-          nome: file.name,
-          url: data.url,
-          downloadUrl: data.downloadUrl,
-        },
-        ...prev,
-      ].slice(0, 5)
-    );
-  } catch (error) {
-    console.error("Erro no upload:", error);
-    alert("Erro ao enviar arquivo");
-  }
-};
+  };
 
   const handleLogout = () => {
     setLogged(false);
@@ -87,85 +106,80 @@ function Admin() {
 
   if (!logged) {
     return (
-      <div className="login">
-        <div className="login-box">
-          <h2>Admin Login</h2>
+      <LoginWrapper>
+        <LoginBox>
+          <LoginTitle>Admin Login</LoginTitle>
 
-          <input
+          <Input
             placeholder="Usuário"
             value={user}
             onChange={(e) => setUser(e.target.value)}
           />
 
-          <input
+          <Input
             placeholder="Senha"
             type="password"
             value={pass}
             onChange={(e) => setPass(e.target.value)}
           />
 
-          <button onClick={handleLogin}>Entrar</button>
-        </div>
-      </div>
+          <LoginButton onClick={handleLogin}>Entrar</LoginButton>
+        </LoginBox>
+      </LoginWrapper>
     );
   }
 
   return (
-    <div className="container">
-      <header className="header">
-        <h2 style={{ color: "#fff" }}>ADMIN - ÁGUA VIVA</h2>
-        <button className="logout-btn" onClick={handleLogout}>
-          Sair
-        </button>
-      </header>
+    <Container>
+      <Header>
+        <HeaderTitle>ADMIN - ÁGUA VIVA</HeaderTitle>
+        <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
+      </Header>
 
-      <div className="content">
-        <div className="panel">
-          <input
+      <Content>
+        <Panel>
+          <HiddenInput
             type="file"
             id="fileInput"
-            style={{ display: "none" }}
             onChange={handleUpload}
           />
 
-          <button
-            className="upload-btn"
+          <UploadButton
             onClick={() => document.getElementById("fileInput")?.click()}
           >
             ⬆️ Upload da Palavra
-          </button>
+          </UploadButton>
 
-          <h4 className="section-title">
+          <SectionTitle>
             Arquivos enviados ({arquivos.length})
-          </h4>
+          </SectionTitle>
 
           {arquivos.length === 0 ? (
-            <p className="empty-message">Nenhum arquivo enviado ainda.</p>
+            <EmptyMessage>Nenhum arquivo enviado ainda.</EmptyMessage>
           ) : (
-            <div className="file-list">
+            <FileList>
               {arquivos.map((item, index) => (
-                <div key={index} className="file-item">
-                  <div className="file-info">
-                    <span className="file-label">Arquivo</span>
-                    <span className="file-name">{item.nome}</span>
-                  </div>
+                <FileItem key={index}>
+                  <FileInfo>
+                    <FileLabel>Arquivo</FileLabel>
+                    <FileName>{item.nome}</FileName>
+                  </FileInfo>
 
-                  <button
-                    className="download"
+                  <DownloadButton
                     onClick={() => {
                       const url = item.downloadUrl || item.url;
                       window.location.href = url;
                     }}
                   >
                     ⬇
-                  </button>
-                </div>
+                  </DownloadButton>
+                </FileItem>
               ))}
-            </div>
+            </FileList>
           )}
-        </div>
-      </div>
-    </div>
+        </Panel>
+      </Content>
+    </Container>
   );
 }
 

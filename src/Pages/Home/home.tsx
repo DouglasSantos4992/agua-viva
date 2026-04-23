@@ -1,5 +1,19 @@
 import { useEffect, useState } from "react";
-import "./home.css";
+import {
+  Container,
+  Header,
+  Title,
+  Content,
+  SectionTitle,
+  Subtitle,
+  EmptyMessage,
+  FileList,
+  FileItem,
+  FileInfo,
+  FileLabel,
+  FileName,
+  DownloadButton,
+} from "./home.styled";
 
 type Arquivo = {
   nome: string;
@@ -32,38 +46,35 @@ function HomePublic() {
   };
 
   return (
-    <div className="container">
-      <header className="header">
-        <h2 style={{ color: "#fff" }}>ÁGUA VIVA</h2>
-      </header>
+    <Container>
+      <Header>
+        <Title>ÁGUA VIVA</Title>
+      </Header>
 
-      <div className="content">
-        <h4 className="section-title">PALAVRAS:</h4>
-        <p className="subtitle">Arquivos enviados da palavra da semana</p>
+      <Content>
+        <SectionTitle>PALAVRAS:</SectionTitle>
+        <Subtitle>Arquivos enviados da palavra da semana</Subtitle>
 
         {arquivos.length === 0 ? (
-          <p className="empty-message">Nenhum arquivo enviado ainda.</p>
+          <EmptyMessage>Nenhum arquivo enviado ainda.</EmptyMessage>
         ) : (
-          <div className="file-list">
+          <FileList>
             {arquivos.map((item, index) => (
-              <div key={index} className="file-item">
-                <div className="file-info">
-                  <span className="file-label">Arquivo</span>
-                  <span className="file-name">{item.nome}</span>
-                </div>
+              <FileItem key={index}>
+                <FileInfo>
+                  <FileLabel>Arquivo</FileLabel>
+                  <FileName>{item.nome}</FileName>
+                </FileInfo>
 
-                <button
-                  className="download"
-                  onClick={() => handleDownload(item)}
-                >
+                <DownloadButton onClick={() => handleDownload(item)}>
                   ⬇
-                </button>
-              </div>
+                </DownloadButton>
+              </FileItem>
             ))}
-          </div>
+          </FileList>
         )}
-      </div>
-    </div>
+      </Content>
+    </Container>
   );
 }
 
