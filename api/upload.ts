@@ -32,10 +32,7 @@ export default async function handler(req: any, res: any) {
       ? Buffer.from(file.originalFilename, "latin1").toString("utf8")
       : `arquivo-${Date.now()}.docx`;
 
-    const safeBlobName = originalName
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w.-]+/g, "-");
+    const safeBlobName = Buffer.from(originalName, "utf8").toString("base64");
 
     const blob = await put(safeBlobName, fileBuffer, {
       access: "public",

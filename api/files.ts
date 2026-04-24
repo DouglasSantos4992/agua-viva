@@ -10,15 +10,20 @@ export default async function handler(_: any, res: any) {
       .slice(-5)
       .reverse()
       .map((file) => ({
-        nome: file.pathname
-          .replace(/-[A-Za-z0-9]+\./, ".")
-          .replace(/-/g, " "),
+        nome: (() => {
+          const encodedName = file.pathname.replace(/-[A-Za-z0-9]+\.[^.]+$/, "");
+          try {
+            return Buffer.from(encodedName, "base64").toString("utf8");
+          } catch {
+            return file.pathname;
+          }
+        })(),
         url: file.url,
         downloadUrl: file.downloadUrl,
       }));
 
     return res.status(200).json(arquivos);
-  } catch (error) {
+  } catch {
     return res.status(500).json({ error: "Erro ao listar arquivos" });
   }
 }
