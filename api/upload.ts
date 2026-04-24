@@ -35,7 +35,7 @@ export default async function handler(req: any, res: any) {
     const safeBlobName = originalName
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, "-");
+      .replace(/[^\w.-]+/g, "-");
 
     const blob = await put(safeBlobName, fileBuffer, {
       access: "public",
