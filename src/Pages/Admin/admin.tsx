@@ -155,15 +155,23 @@ function Admin() {
                   </FileInfo>
 
                   <DownloadButton
-                    onClick={() => {
+                    onClick={async () => {
                       const url = item.downloadUrl || item.url;
 
+                      const response = await fetch(url);
+                      const blob = await response.blob();
+
+                      const blobUrl = window.URL.createObjectURL(blob);
+
                       const link = document.createElement("a");
-                      link.href = url;
+                      link.href = blobUrl;
                       link.download = item.nome;
+
                       document.body.appendChild(link);
                       link.click();
                       document.body.removeChild(link);
+
+                      window.URL.revokeObjectURL(blobUrl);
                     }}
                   >
                     ⬇
