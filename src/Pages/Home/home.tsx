@@ -37,9 +37,15 @@ function HomePublic() {
   }, []);
 
   const handleDownload = (item: Arquivo) => {
-    const url = item.downloadUrl || item.url;
-    window.location.href = url;
-  };
+  const url = item.downloadUrl || item.url;
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = item.nome;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};;
 
   return (
     <Container>

@@ -85,7 +85,7 @@ function Admin() {
             downloadUrl: data.downloadUrl,
           },
           ...prev,
-        ].slice(0, 5)
+        ].slice(0, 5),
       );
     } catch (error) {
       console.error("Erro no upload:", error);
@@ -133,11 +133,7 @@ function Admin() {
 
       <Content>
         <Panel>
-          <HiddenInput
-            type="file"
-            id="fileInput"
-            onChange={handleUpload}
-          />
+          <HiddenInput type="file" id="fileInput" onChange={handleUpload} />
 
           <UploadButton
             onClick={() => document.getElementById("fileInput")?.click()}
@@ -145,9 +141,7 @@ function Admin() {
             ⬆️ Upload da Palavra
           </UploadButton>
 
-          <SectionTitle>
-            Arquivos enviados ({arquivos.length})
-          </SectionTitle>
+          <SectionTitle>Arquivos enviados ({arquivos.length})</SectionTitle>
 
           {arquivos.length === 0 ? (
             <EmptyMessage>Nenhum arquivo enviado ainda.</EmptyMessage>
@@ -163,7 +157,13 @@ function Admin() {
                   <DownloadButton
                     onClick={() => {
                       const url = item.downloadUrl || item.url;
-                      window.location.href = url;
+
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.download = item.nome;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
                     }}
                   >
                     ⬇
