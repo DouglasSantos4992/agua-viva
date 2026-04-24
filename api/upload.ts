@@ -28,14 +28,12 @@ export default async function handler(req: any, res: any) {
 
     const fileBuffer = fs.readFileSync(file.filepath);
 
-    const originalName = file.originalFilename
-      ? Buffer.from(file.originalFilename, "latin1").toString("utf8")
-      : `arquivo-${Date.now()}.docx`;
+    const originalName = file.originalFilename || `arquivo-${Date.now()}.docx`;
 
-    const safeBlobName = originalName
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w.-]+/g, "-");
+    const ext = originalName.split(".").pop();
+    const encodedName = Buffer.from(originalName, "utf8").toString("base64url");
+
+    const safeBlobName = `${encodedName}.${ext}`;
 
     const blob = await put(safeBlobName, fileBuffer, {
       access: "public",
