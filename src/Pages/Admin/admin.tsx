@@ -2,17 +2,21 @@ import { useEffect, useState } from "react";
 import {
   LoginWrapper,
   LoginBox,
+  LoginLogo,
   LoginTitle,
   Input,
   LoginButton,
   Container,
   Header,
+  HeaderContent,
+  HeaderLogo,
   HeaderTitle,
   LogoutButton,
   Content,
   Panel,
   HiddenInput,
   UploadButton,
+  UploadStatus,
   SectionTitle,
   EmptyMessage,
   FileList,
@@ -23,6 +27,7 @@ import {
   DownloadButton,
 } from "./admin.styled";
 import type { Arquivo } from "./type";
+import aguaVivaLogo from "../../assets/agua-viva-logo-branco.png";
 
 const USER = "admin";
 const PASS = "aguaviva@2026";
@@ -32,6 +37,9 @@ function Admin() {
   const [logged, setLogged] = useState(false);
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
 
   useEffect(() => {
     async function carregarArquivos() {
@@ -43,6 +51,8 @@ function Admin() {
         setArquivos(data.slice(-5).reverse());
       } catch (error) {
         console.error("Erro ao carregar arquivos:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -62,6 +72,9 @@ function Admin() {
     if (!file) return;
 
     try {
+      setIsUploading(true);
+      setUploadMessage("");
+
       const formData = new FormData();
       formData.append("file", file);
 
@@ -87,9 +100,14 @@ function Admin() {
           ...prev,
         ].slice(0, 5),
       );
+
+      setUploadMessage("Palavra enviada com sucesso.");
+      event.target.value = "";
     } catch (error) {
       console.error("Erro no upload:", error);
       alert("Erro ao enviar arquivo");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -97,13 +115,63 @@ function Admin() {
     setLogged(false);
     setUser("");
     setPass("");
+    setUploadMessage("");
+  };
+
+  const handleDownload = async (item: Arquivo) => {
+    const url = item.downloadUrl || item.url;
+
+    const response = await fetch(url);
+    const blob = await response.blob();
+
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = item.nome;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(blobUrl);
+  };
+
+  const renderFileContent = () => {
+    if (isLoading) {
+      return <EmptyMessage>Carregando arquivos...</EmptyMessage>;
+    }
+
+    if (arquivos.length === 0) {
+      return <EmptyMessage>Nenhum arquivo enviado ainda.</EmptyMessage>;
+    }
+
+    return (
+      <FileList>
+        {arquivos.map((item, index) => (
+          <FileItem key={index}>
+            <FileInfo>
+              <FileLabel>Arquivo</FileLabel>
+              <FileName>{item.nome}</FileName>
+            </FileInfo>
+
+            <DownloadButton
+              aria-label={`Baixar ${item.nome}`}
+              title="Baixar arquivo"
+              onClick={() => handleDownload(item)}
+            />
+          </FileItem>
+        ))}
+      </FileList>
+    );
   };
 
   if (!logged) {
     return (
       <LoginWrapper>
         <LoginBox>
-          <LoginTitle>Admin Login</LoginTitle>
+          <LoginLogo src={aguaVivaLogo} alt="Logo da Igreja Batista Água Viva" />
+          <LoginTitle>Acesso administrativo</LoginTitle>
 
           <Input
             placeholder="Usuário"
@@ -118,7 +186,9 @@ function Admin() {
             onChange={(e) => setPass(e.target.value)}
           />
 
-          <LoginButton onClick={handleLogin}>Entrar</LoginButton>
+          <LoginButton type="button" onClick={handleLogin}>
+            Entrar
+          </LoginButton>
         </LoginBox>
       </LoginWrapper>
     );
@@ -127,8 +197,13 @@ function Admin() {
   return (
     <Container>
       <Header>
-        <HeaderTitle>ADMIN - ÁGUA VIVA</HeaderTitle>
-        <LogoutButton onClick={handleLogout}>Sair</LogoutButton>
+        <HeaderContent>
+          <HeaderLogo src={aguaVivaLogo} alt="Logo da Igreja Batista Água Viva" />
+          <HeaderTitle>Admin Água Viva</HeaderTitle>
+          <LogoutButton type="button" onClick={handleLogout}>
+            Sair
+          </LogoutButton>
+        </HeaderContent>
       </Header>
 
       <Content>
@@ -136,50 +211,17 @@ function Admin() {
           <HiddenInput type="file" id="fileInput" onChange={handleUpload} />
 
           <UploadButton
+            type="button"
+            disabled={isUploading}
             onClick={() => document.getElementById("fileInput")?.click()}
           >
-            ⬆️ Upload da Palavra
+            {isUploading ? "Enviando..." : "Enviar palavra"}
           </UploadButton>
+          {uploadMessage && <UploadStatus>{uploadMessage}</UploadStatus>}
 
           <SectionTitle>Arquivos enviados ({arquivos.length})</SectionTitle>
 
-          {arquivos.length === 0 ? (
-            <EmptyMessage>Nenhum arquivo enviado ainda.</EmptyMessage>
-          ) : (
-            <FileList>
-              {arquivos.map((item, index) => (
-                <FileItem key={index}>
-                  <FileInfo>
-                    <FileLabel>Arquivo</FileLabel>
-                    <FileName>{item.nome}</FileName>
-                  </FileInfo>
-
-                  <DownloadButton
-                    onClick={async () => {
-                      const url = item.downloadUrl || item.url;
-
-                      const response = await fetch(url);
-                      const blob = await response.blob();
-
-                      const blobUrl = window.URL.createObjectURL(blob);
-
-                      const link = document.createElement("a");
-                      link.href = blobUrl;
-                      link.download = item.nome;
-
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-
-                      window.URL.revokeObjectURL(blobUrl);
-                    }}
-                  >
-                    ⬇
-                  </DownloadButton>
-                </FileItem>
-              ))}
-            </FileList>
-          )}
+          {renderFileContent()}
         </Panel>
       </Content>
     </Container>
