@@ -1,6 +1,5 @@
 import { del } from "@vercel/blob";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { isAdminRequest } from "./auth";
 
 function parseBody(body: unknown) {
   if (typeof body === "string") {
@@ -13,10 +12,6 @@ function parseBody(body: unknown) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método não permitido" });
-  }
-
-  if (!isAdminRequest(req)) {
-    return res.status(401).json({ error: "Sessão inválida" });
   }
 
   try {

@@ -2,7 +2,6 @@ import { put } from "@vercel/blob";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import formidable from "formidable";
 import fs from "fs";
-import { isAdminRequest } from "./auth";
 
 export const config = {
   api: {
@@ -20,10 +19,6 @@ function getExtension(fileName: string) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método não permitido" });
-  }
-
-  if (!isAdminRequest(req)) {
-    return res.status(401).json({ error: "Sessão inválida" });
   }
 
   const form = formidable();

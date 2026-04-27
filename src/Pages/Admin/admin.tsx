@@ -36,22 +36,21 @@ import { DownloadIcon, TrashIcon, UploadIcon } from "../../components/FileIcons"
 import { formatUploadDate, validateUploadFile } from "../../utils/files";
 import aguaVivaLogo from "../../assets/agua-viva-logo-branco.png";
 
-const TOKEN_STORAGE_KEY = "agua-viva-admin-token";
+const USER = "admin";
+const PASS = "aguaviva@2026";
 
 function Admin() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
-  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_STORAGE_KEY) || "");
+  const [logged, setLogged] = useState(false);
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState("");
   const [loginMessage, setLoginMessage] = useState("");
   const [downloadingUrl, setDownloadingUrl] = useState("");
   const [deletingUrl, setDeletingUrl] = useState("");
-  const logged = Boolean(token);
 
   useEffect(() => {
     async function carregarArquivos() {
@@ -71,38 +70,17 @@ function Admin() {
     carregarArquivos();
   }, []);
 
-  const handleLogin = async () => {
-    try {
-      setIsLoggingIn(true);
-      setLoginMessage("");
+  const handleLogin = () => {
+    setLoginMessage("");
 
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user,
-          password: pass,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setLoginMessage(data.error || "Login inválido");
-        return;
-      }
-
-      localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
-      setToken(data.token);
+    if (user === USER && pass === PASS) {
+      setLogged(true);
       setPass("");
       setShowPassword(false);
-    } catch {
-      setLoginMessage("Não foi possível entrar agora.");
-    } finally {
-      setIsLoggingIn(false);
+      return;
     }
+
+    setLoginMessage("Login inválido");
   };
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,9 +104,6 @@ function Admin() {
 
       const response = await fetch("/api/upload", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         body: formData,
       });
       const data = await response.json();
@@ -161,8 +136,7 @@ function Admin() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-    setToken("");
+    setLogged(false);
     setUser("");
     setPass("");
     setShowPassword(false);
@@ -212,7 +186,6 @@ function Admin() {
       const response = await fetch("/api/delete", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ url: item.url }),
@@ -310,8 +283,8 @@ function Admin() {
           </PasswordField>
           {loginMessage && <UploadStatus $tone="error">{loginMessage}</UploadStatus>}
 
-          <LoginButton type="button" disabled={isLoggingIn} onClick={handleLogin}>
-            {isLoggingIn ? "Entrando..." : "Entrar"}
+          <LoginButton type="button" onClick={handleLogin}>
+            Entrar
           </LoginButton>
         </LoginBox>
       </LoginWrapper>
