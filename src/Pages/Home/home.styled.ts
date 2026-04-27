@@ -226,6 +226,13 @@ export const FileName = styled.span`
   overflow: hidden;
 `;
 
+export const FileMeta = styled.span`
+  margin-top: 7px;
+  color: #66839a;
+  font-size: 13px;
+  font-weight: 600;
+`;
+
 export const DownloadButton = styled.button`
   width: 46px;
   height: 46px;
@@ -260,12 +267,16 @@ export const DownloadButton = styled.button`
       inset 0 2px 6px rgba(1, 38, 69, 0.18);
   }
 
-  &::before {
-    content: "↓";
+  &:disabled {
+    cursor: wait;
+    opacity: 0.72;
+    transform: none;
+  }
+
+  svg {
+    width: 23px;
+    height: 23px;
     color: #fff;
-    font-size: 22px;
-    font-weight: 900;
-    line-height: 1;
   }
 
   @media (max-width: 640px) {

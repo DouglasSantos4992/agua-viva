@@ -93,6 +93,73 @@ export const Input = styled.input`
   }
 `;
 
+export const PasswordField = styled.div`
+  position: relative;
+  margin-bottom: 15px;
+
+  ${Input} {
+    margin-bottom: 0;
+    padding-right: 54px;
+  }
+`;
+
+export const PasswordToggle = styled.button<{ $visible: boolean }>`
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  display: inline-grid;
+  place-items: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #52708b;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+
+  &::before {
+    content: "";
+    width: 20px;
+    height: 12px;
+    border: 2px solid currentColor;
+    border-radius: 50% / 60%;
+    box-sizing: border-box;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: currentColor;
+  }
+
+  span {
+    position: absolute;
+    width: 24px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    transform: rotate(-42deg) scaleX(${({ $visible }) => ($visible ? 0 : 1)});
+    transition: transform 180ms ease;
+  }
+
+  &:hover {
+    background: rgba(19, 195, 230, 0.1);
+    color: #075985;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(19, 195, 230, 0.28);
+    outline-offset: 2px;
+  }
+`;
+
 export const LoginButton = styled.button`
   width: 100%;
   min-height: 52px;
@@ -126,6 +193,12 @@ export const LoginButton = styled.button`
       0 10px 20px rgba(3, 105, 161, 0.28),
       inset 0 2px 6px rgba(1, 38, 69, 0.18);
   }
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.82;
+    transform: none;
+  }
 `;
 
 export const Container = styled.div`
@@ -144,11 +217,10 @@ export const Container = styled.div`
 
 export const Header = styled.header`
   color: white;
-  padding: 30px 24px 72px;
-  text-align: center;
+  padding: 34px 24px 82px;
 
   @media (max-width: 640px) {
-    padding: 28px 18px 54px;
+    padding: 24px 18px 58px;
   }
 `;
 
@@ -156,8 +228,14 @@ export const HeaderContent = styled.div`
   width: min(920px, 100%);
   margin: 0 auto;
   display: grid;
-  justify-items: center;
-  gap: 10px;
+  grid-template-columns: 96px minmax(0, 1fr) 96px;
+  align-items: center;
+  gap: 18px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 64px minmax(0, 1fr) 64px;
+    gap: 10px;
+  }
 `;
 
 export const HeaderLogo = styled.img`
@@ -185,9 +263,11 @@ export const HeaderTitle = styled.h2`
   font-size: clamp(26px, 4vw, 40px);
   font-weight: 800;
   letter-spacing: 0;
+  line-height: 1.1;
+  text-align: center;
 
   @media (max-width: 640px) {
-    font-size: 28px;
+    font-size: 24px;
   }
 `;
 
@@ -213,10 +293,11 @@ const headerActionStyles = `
 
 export const LogoutButton = styled.button`
   ${headerActionStyles}
-  margin-top: 8px;
+  justify-self: end;
 
   @media (max-width: 640px) {
-    margin-top: 2px;
+    min-height: 40px;
+    padding: 8px 12px;
   }
 `;
 
@@ -292,18 +373,15 @@ export const UploadButton = styled.button`
     transform: none;
   }
 
-  &::before {
-    content: "↑";
+  svg {
     width: 24px;
     height: 24px;
-    display: inline-grid;
-    place-items: center;
+    padding: 4px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.18);
     color: #fff;
-    font-size: 17px;
-    line-height: 1;
-    font-weight: 900;
+    box-sizing: border-box;
+    flex: 0 0 24px;
   }
 
   @media (max-width: 640px) {
@@ -312,13 +390,13 @@ export const UploadButton = styled.button`
   }
 `;
 
-export const UploadStatus = styled.p`
+export const UploadStatus = styled.p<{ $tone?: "success" | "error" }>`
   margin-top: 12px;
   padding: 12px 14px;
-  border: 1px solid #b8e4f0;
+  border: 1px solid ${({ $tone }) => ($tone === "error" ? "#f4b7b7" : "#b8e4f0")};
   border-radius: 8px;
-  background: #effafe;
-  color: #075985;
+  background: ${({ $tone }) => ($tone === "error" ? "#fff1f1" : "#effafe")};
+  color: ${({ $tone }) => ($tone === "error" ? "#9f1d1d" : "#075985")};
   font-size: 14px;
   font-weight: 700;
   text-align: center;
@@ -413,7 +491,21 @@ export const FileName = styled.span`
   overflow: hidden;
 `;
 
-export const DownloadButton = styled.button`
+export const FileMeta = styled.span`
+  margin-top: 7px;
+  color: #66839a;
+  font-size: 13px;
+  font-weight: 600;
+`;
+
+export const FileActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+`;
+
+const fileActionButtonStyles = `
   width: 46px;
   height: 46px;
   flex: 0 0 46px;
@@ -447,17 +539,43 @@ export const DownloadButton = styled.button`
       inset 0 2px 6px rgba(1, 38, 69, 0.18);
   }
 
-  &::before {
-    content: "↓";
+  &:disabled {
+    cursor: wait;
+    opacity: 0.72;
+    transform: none;
+  }
+
+  svg {
+    width: 23px;
+    height: 23px;
     color: #fff;
-    font-size: 22px;
-    font-weight: 900;
-    line-height: 1;
   }
 
   @media (max-width: 640px) {
     width: 44px;
     height: 44px;
     flex-basis: 44px;
+  }
+`;
+
+export const DownloadButton = styled.button`
+  ${fileActionButtonStyles}
+`;
+
+export const DeleteButton = styled.button`
+  ${fileActionButtonStyles}
+  background: #fff;
+  color: #b42318;
+  border: 1px solid #f1b7b0;
+  box-shadow: none;
+
+  &:hover {
+    background: #fff5f4;
+    border-color: #e27f73;
+    box-shadow: 0 12px 22px rgba(180, 35, 24, 0.12);
+  }
+
+  svg {
+    color: #b42318;
   }
 `;

@@ -5,6 +5,8 @@ import {
   LoginLogo,
   LoginTitle,
   Input,
+  PasswordField,
+  PasswordToggle,
   LoginButton,
   Container,
   Header,
@@ -23,23 +25,33 @@ import {
   FileItem,
   FileInfo,
   FileLabel,
+  FileMeta,
   FileName,
+  FileActions,
   DownloadButton,
+  DeleteButton,
 } from "./admin.styled";
-import type { Arquivo } from "./type";
+import type { Arquivo } from "../../types/arquivo";
+import { DownloadIcon, TrashIcon, UploadIcon } from "../../components/FileIcons";
+import { formatUploadDate, validateUploadFile } from "../../utils/files";
 import aguaVivaLogo from "../../assets/agua-viva-logo-branco.png";
 
-const USER = "admin";
-const PASS = "aguaviva@2026";
+const TOKEN_STORAGE_KEY = "agua-viva-admin-token";
 
 function Admin() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
-  const [logged, setLogged] = useState(false);
+  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_STORAGE_KEY) || "");
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState("");
+  const [loginMessage, setLoginMessage] = useState("");
+  const [downloadingUrl, setDownloadingUrl] = useState("");
+  const [deletingUrl, setDeletingUrl] = useState("");
+  const logged = Boolean(token);
 
   useEffect(() => {
     async function carregarArquivos() {
@@ -48,7 +60,7 @@ function Admin() {
         if (!response.ok) return;
 
         const data = await response.json();
-        setArquivos(data.slice(-5).reverse());
+        setArquivos(data);
       } catch (error) {
         console.error("Erro ao carregar arquivos:", error);
       } finally {
@@ -59,17 +71,51 @@ function Admin() {
     carregarArquivos();
   }, []);
 
-  const handleLogin = () => {
-    if (user === USER && pass === PASS) {
-      setLogged(true);
-    } else {
-      alert("Login inválido");
+  const handleLogin = async () => {
+    try {
+      setIsLoggingIn(true);
+      setLoginMessage("");
+
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user,
+          password: pass,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setLoginMessage(data.error || "Login inválido");
+        return;
+      }
+
+      localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+      setToken(data.token);
+      setPass("");
+      setShowPassword(false);
+    } catch {
+      setLoginMessage("Não foi possível entrar agora.");
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    const validationMessage = validateUploadFile(file);
+
+    if (validationMessage) {
+      setUploadMessage(validationMessage);
+      event.target.value = "";
+      return;
+    }
 
     try {
       setIsUploading(true);
@@ -80,22 +126,25 @@ function Admin() {
 
       const response = await fetch("/api/upload", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
+      const data = await response.json();
 
       if (!response.ok) {
-        alert("Erro ao enviar arquivo");
+        setUploadMessage(data.error || "Erro ao enviar arquivo");
         return;
       }
-
-      const data = await response.json();
 
       setArquivos((prev) =>
         [
           {
-            nome: file.name,
+            nome: data.nome,
             url: data.url,
             downloadUrl: data.downloadUrl,
+            uploadedAt: data.uploadedAt,
           },
           ...prev,
         ].slice(0, 5),
@@ -105,36 +154,83 @@ function Admin() {
       event.target.value = "";
     } catch (error) {
       console.error("Erro no upload:", error);
-      alert("Erro ao enviar arquivo");
+      setUploadMessage("Erro ao enviar arquivo");
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleLogout = () => {
-    setLogged(false);
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    setToken("");
     setUser("");
     setPass("");
+    setShowPassword(false);
     setUploadMessage("");
+    setLoginMessage("");
   };
 
   const handleDownload = async (item: Arquivo) => {
-    const url = item.downloadUrl || item.url;
+    try {
+      const url = item.downloadUrl || item.url;
+      setDownloadingUrl(url);
 
-    const response = await fetch(url);
-    const blob = await response.blob();
+      const response = await fetch(url);
 
-    const blobUrl = window.URL.createObjectURL(blob);
+      if (!response.ok) {
+        setUploadMessage("Não foi possível baixar o arquivo.");
+        return;
+      }
 
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = item.nome;
+      const blob = await response.blob();
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const blobUrl = window.URL.createObjectURL(blob);
 
-    window.URL.revokeObjectURL(blobUrl);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = item.nome;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      setUploadMessage("Não foi possível baixar o arquivo.");
+    } finally {
+      setDownloadingUrl("");
+    }
+  };
+
+  const handleDelete = async (item: Arquivo) => {
+    if (!confirm(`Excluir "${item.nome}"?`)) return;
+
+    try {
+      setDeletingUrl(item.url);
+      setUploadMessage("");
+
+      const response = await fetch("/api/delete", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: item.url }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setUploadMessage(data.error || "Erro ao excluir arquivo");
+        return;
+      }
+
+      setArquivos((prev) => prev.filter((arquivo) => arquivo.url !== item.url));
+      setUploadMessage("Arquivo excluído com sucesso.");
+    } catch {
+      setUploadMessage("Erro ao excluir arquivo");
+    } finally {
+      setDeletingUrl("");
+    }
   };
 
   const renderFileContent = () => {
@@ -150,16 +246,32 @@ function Admin() {
       <FileList>
         {arquivos.map((item, index) => (
           <FileItem key={index}>
-            <FileInfo>
-              <FileLabel>Arquivo</FileLabel>
-              <FileName>{item.nome}</FileName>
-            </FileInfo>
+              <FileInfo>
+                <FileLabel>Arquivo</FileLabel>
+                <FileName>{item.nome}</FileName>
+                {item.uploadedAt && (
+                  <FileMeta>Enviado em {formatUploadDate(item.uploadedAt)}</FileMeta>
+                )}
+              </FileInfo>
 
-            <DownloadButton
-              aria-label={`Baixar ${item.nome}`}
-              title="Baixar arquivo"
-              onClick={() => handleDownload(item)}
-            />
+              <FileActions>
+                <DownloadButton
+                  aria-label={`Baixar ${item.nome}`}
+                  title="Baixar arquivo"
+                  disabled={downloadingUrl === (item.downloadUrl || item.url)}
+                  onClick={() => handleDownload(item)}
+                >
+                  <DownloadIcon />
+                </DownloadButton>
+                <DeleteButton
+                  aria-label={`Excluir ${item.nome}`}
+                  title="Excluir arquivo"
+                  disabled={deletingUrl === item.url}
+                  onClick={() => handleDelete(item)}
+                >
+                  <TrashIcon />
+                </DeleteButton>
+              </FileActions>
           </FileItem>
         ))}
       </FileList>
@@ -179,15 +291,27 @@ function Admin() {
             onChange={(e) => setUser(e.target.value)}
           />
 
-          <Input
-            placeholder="Senha"
-            type="password"
-            value={pass}
-            onChange={(e) => setPass(e.target.value)}
-          />
+          <PasswordField>
+            <Input
+              placeholder="Senha"
+              type={showPassword ? "text" : "password"}
+              value={pass}
+              onChange={(e) => setPass(e.target.value)}
+            />
+            <PasswordToggle
+              type="button"
+              $visible={showPassword}
+              aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              <span aria-hidden="true" />
+            </PasswordToggle>
+          </PasswordField>
+          {loginMessage && <UploadStatus $tone="error">{loginMessage}</UploadStatus>}
 
-          <LoginButton type="button" onClick={handleLogin}>
-            Entrar
+          <LoginButton type="button" disabled={isLoggingIn} onClick={handleLogin}>
+            {isLoggingIn ? "Entrando..." : "Entrar"}
           </LoginButton>
         </LoginBox>
       </LoginWrapper>
@@ -208,13 +332,19 @@ function Admin() {
 
       <Content>
         <Panel>
-          <HiddenInput type="file" id="fileInput" onChange={handleUpload} />
+          <HiddenInput
+            type="file"
+            id="fileInput"
+            accept=".pdf,.doc,.docx,.mp3,.m4a"
+            onChange={handleUpload}
+          />
 
           <UploadButton
             type="button"
             disabled={isUploading}
             onClick={() => document.getElementById("fileInput")?.click()}
           >
+            <UploadIcon />
             {isUploading ? "Enviando..." : "Enviar palavra"}
           </UploadButton>
           {uploadMessage && <UploadStatus>{uploadMessage}</UploadStatus>}

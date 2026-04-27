@@ -17,14 +17,19 @@ import {
   FileInfo,
   FileLabel,
   FileName,
+  FileMeta,
   DownloadButton,
 } from "./home.styled";
-import type { Arquivo } from "./type";
+import type { Arquivo } from "../../types/arquivo";
+import { DownloadIcon } from "../../components/FileIcons";
+import { formatUploadDate } from "../../utils/files";
 import aguaVivaLogo from "../../assets/agua-viva-logo-branco.png";
 
 function HomePublic() {
   const [arquivos, setArquivos] = useState<Arquivo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [downloadingUrl, setDownloadingUrl] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     async function carregarArquivos() {
@@ -37,7 +42,9 @@ function HomePublic() {
         }
 
         const data = await response.json();
-        setArquivos(data.slice(-5).reverse());
+        setArquivos(data);
+      } catch {
+        setMessage("Não foi possível carregar as palavras agora.");
       } finally {
         setIsLoading(false);
       }
@@ -47,22 +54,35 @@ function HomePublic() {
   }, []);
 
   const handleDownload = async (item: Arquivo) => {
-    const url = item.downloadUrl || item.url;
+    try {
+      const url = item.downloadUrl || item.url;
+      setDownloadingUrl(url);
+      setMessage("");
 
-    const response = await fetch(url);
-    const blob = await response.blob();
+      const response = await fetch(url);
 
-    const blobUrl = window.URL.createObjectURL(blob);
+      if (!response.ok) {
+        setMessage("Não foi possível baixar o arquivo.");
+        return;
+      }
 
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = item.nome;
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = item.nome;
 
-    window.URL.revokeObjectURL(blobUrl);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      setMessage("Não foi possível baixar o arquivo.");
+    } finally {
+      setDownloadingUrl("");
+    }
   };
 
   const renderContent = () => {
@@ -78,16 +98,22 @@ function HomePublic() {
       <FileList>
         {arquivos.map((item, index) => (
           <FileItem key={index}>
-            <FileInfo>
-              <FileLabel>Arquivo</FileLabel>
-              <FileName>{item.nome}</FileName>
-            </FileInfo>
+              <FileInfo>
+                <FileLabel>Arquivo</FileLabel>
+                <FileName>{item.nome}</FileName>
+                {item.uploadedAt && (
+                  <FileMeta>Enviado em {formatUploadDate(item.uploadedAt)}</FileMeta>
+                )}
+              </FileInfo>
 
             <DownloadButton
               aria-label={`Baixar ${item.nome}`}
               title="Baixar arquivo"
+              disabled={downloadingUrl === (item.downloadUrl || item.url)}
               onClick={() => handleDownload(item)}
-            />
+            >
+              <DownloadIcon />
+            </DownloadButton>
           </FileItem>
         ))}
       </FileList>
@@ -113,6 +139,7 @@ function HomePublic() {
           <Subtitle>Arquivos enviados da palavra da semana</Subtitle>
         </SectionHeader>
 
+        {message && <EmptyMessage>{message}</EmptyMessage>}
         {renderContent()}
       </Content>
     </Container>

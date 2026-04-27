@@ -1,6 +1,8 @@
 import { put } from "@vercel/blob";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import formidable from "formidable";
 import fs from "fs";
+import { isAdminRequest } from "./auth";
 
 export const config = {
   api: {
@@ -8,9 +10,20 @@ export const config = {
   },
 };
 
-export default async function handler(req: any, res: any) {
+const MAX_FILE_SIZE = 25 * 1024 * 1024;
+const ALLOWED_EXTENSIONS = new Set(["doc", "docx", "pdf", "mp3", "m4a"]);
+
+function getExtension(fileName: string) {
+  return fileName.split(".").pop()?.toLowerCase() || "";
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método não permitido" });
+  }
+
+  if (!isAdminRequest(req)) {
+    return res.status(401).json({ error: "Sessão inválida" });
   }
 
   const form = formidable();
@@ -29,8 +42,20 @@ export default async function handler(req: any, res: any) {
     const fileBuffer = fs.readFileSync(file.filepath);
 
     const originalName = file.originalFilename || `arquivo-${Date.now()}.docx`;
+    const ext = getExtension(originalName);
 
-    const ext = originalName.split(".").pop();
+    if (!ALLOWED_EXTENSIONS.has(ext)) {
+      return res.status(400).json({
+        error: "Formato inválido. Envie PDF, DOC, DOCX, MP3 ou M4A.",
+      });
+    }
+
+    if (fileBuffer.byteLength > MAX_FILE_SIZE) {
+      return res.status(400).json({
+        error: "Arquivo muito grande. O limite é 25 MB.",
+      });
+    }
+
     const encodedName = Buffer.from(originalName, "utf8").toString("base64url");
 
     const safeBlobName = `${encodedName}.${ext}`;
@@ -45,6 +70,7 @@ export default async function handler(req: any, res: any) {
       nome: originalName,
       url: blob.url,
       downloadUrl: blob.downloadUrl,
+      uploadedAt: new Date().toISOString(),
     });
   });
 }
