@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import crypto from "node:crypto";
 import type { IncomingHttpHeaders } from "node:http";
 
